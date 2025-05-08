@@ -6,6 +6,7 @@ export interface Model {
   modelId: string;
   modelName: string;
   modelUsername: string;
+  instagram?: string;
   createdAt: Date;
   isActive: boolean;
   averageScore: number | null;

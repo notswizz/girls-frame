@@ -30,12 +30,25 @@ export async function GET() {
       console.log(`Found ${anyImages.length} images in total`);
       console.log("First image example:", JSON.stringify(anyImages[0] || {}, null, 2));
       
+      // Fetch model data from the models collection to get instagram info
+      const modelsCollection = db.collection('models');
+      const modelsData = await modelsCollection.find({}).toArray();
+      
+      // Create a map of modelId to instagram
+      const modelMap: Record<string, string> = modelsData.reduce((acc: Record<string, string>, model: any) => {
+        if (model.username) {
+          acc[model.username] = model.instagram || '';
+        }
+        return acc;
+      }, {});
+      
       // Map the images to the format our frontend expects
-      const mappedImages = anyImages.map(img => ({
+      const mappedImages = anyImages.map((img: any) => ({
         _id: img._id,
         url: img.url,
         modelName: img.modelName || "Unknown",
         modelUsername: img.modelUsername || "unknown",
+        instagram: img.modelUsername ? modelMap[img.modelUsername] || '' : '',
         wins: img.wins || 0,
         losses: img.losses || 0,
         winRate: img.winRate || 0,
@@ -45,12 +58,25 @@ export async function GET() {
       return NextResponse.json({ models: mappedImages });
     }
     
+    // Fetch model data from the models collection to get instagram info
+    const modelsCollection = db.collection('models');
+    const modelsData = await modelsCollection.find({}).toArray();
+    
+    // Create a map of modelId to instagram
+    const modelMap: Record<string, string> = modelsData.reduce((acc: Record<string, string>, model: any) => {
+      if (model.username) {
+        acc[model.username] = model.instagram || '';
+      }
+      return acc;
+    }, {});
+    
     // Map the images to match our frontend structure
-    const mappedImages = images.map(img => ({
+    const mappedImages = images.map((img: any) => ({
       _id: img._id,
       url: img.url,
       modelName: img.modelName || "Unknown",
       modelUsername: img.modelUsername || "unknown",
+      instagram: img.modelUsername ? modelMap[img.modelUsername] || '' : '',
       wins: img.wins || 0,
       losses: img.losses || 0,
       winRate: img.winRate || 0,
