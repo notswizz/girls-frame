@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { Model } from '~/lib/types';
-import Image from 'next/image';
 
 interface ModelCardProps {
   model: Model;
