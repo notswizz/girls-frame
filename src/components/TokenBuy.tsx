@@ -55,13 +55,14 @@ export default function TokenBuy() {
       });
       
       setTxHash(hash);
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error("Error buying tokens:", error);
-      if (error?.shortMessage) {
-        if (error.shortMessage.includes("insufficient funds")) {
+      if (typeof error === 'object' && error !== null && 'shortMessage' in error) {
+        const typedError = error as { shortMessage?: string };
+        if (typedError.shortMessage?.includes("insufficient funds")) {
           setError("Not enough ETH to cover the transaction.");
         } else {
-          setError(error.shortMessage);
+          setError(typedError.shortMessage || "Transaction failed. Please try again.");
         }
       } else {
         setError("Transaction failed. Please try again.");

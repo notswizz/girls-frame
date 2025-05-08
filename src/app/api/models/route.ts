@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '~/lib/mongodb';
 
-// Base URL for model images
-const BASE_IMAGE_URL = "https://kmf-app.s3.us-east-2.amazonaws.com/images";
-
 export async function GET() {
   try {
     const db = await connectToDatabase();

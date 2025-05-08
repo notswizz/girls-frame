@@ -1,42 +1,87 @@
 import { useState, useEffect } from 'react';
 import { useReadContract, useWriteContract, useAccount, useWaitForTransactionReceipt } from 'wagmi';
 import { parseTokenAmount, formatTokenAmount, CLANKER_TOKEN_ADDRESS, TOKEN_ABI, TREASURY_ADDRESS } from './tokenUtils';
+import { formatUnits, parseUnits } from 'viem';
 
 // Hook to get token balance
-export function useTokenBalance(tokenAddress = CLANKER_TOKEN_ADDRESS) {
+export function useTokenBalance() {
   const { address } = useAccount();
-  const [formattedBalance, setFormattedBalance] = useState("0");
-  
-  const { data: balanceData } = useReadContract({
-    address: tokenAddress as `0x${string}`,
+  const [symbol, setSymbol] = useState("TOKEN");
+  const [decimals, setDecimals] = useState(18);
+  const [formattedBalance, setFormattedBalance] = useState<string>("0");
+  const [isRefetching, setIsRefetching] = useState(false);
+
+  // Get token symbol
+  const {
+    data: symbolData,
+    isError: isSymbolError,
+    isLoading: isSymbolLoading,
+  } = useReadContract({
+    address: CLANKER_TOKEN_ADDRESS as `0x${string}`,
     abi: TOKEN_ABI,
-    functionName: 'balanceOf',
-    args: [address],
+    functionName: "symbol",
   });
 
-  const { data: decimalsData } = useReadContract({
-    address: tokenAddress as `0x${string}`,
+  // Get token decimals
+  const {
+    data: decimalsData,
+    isError: isDecimalsError,
+    isLoading: isDecimalsLoading,
+  } = useReadContract({
+    address: CLANKER_TOKEN_ADDRESS as `0x${string}`,
     abi: TOKEN_ABI,
-    functionName: 'decimals',
+    functionName: "decimals",
   });
 
-  const { data: symbolData } = useReadContract({
-    address: tokenAddress as `0x${string}`,
+  // Get token balance
+  const {
+    data: balanceData,
+    isError: isBalanceError,
+    isLoading: isBalanceLoading,
+    refetch: refetchBalance,
+  } = useReadContract({
+    address: CLANKER_TOKEN_ADDRESS as `0x${string}`,
     abi: TOKEN_ABI,
-    functionName: 'symbol',
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
   });
 
   useEffect(() => {
-    if (balanceData && decimalsData) {
-      setFormattedBalance(formatTokenAmount(balanceData as bigint, decimalsData as number));
+    if (symbolData) {
+      setSymbol(symbolData as string);
     }
-  }, [balanceData, decimalsData]);
+  }, [symbolData]);
+
+  useEffect(() => {
+    if (decimalsData) {
+      setDecimals(Number(decimalsData));
+    }
+  }, [decimalsData]);
+
+  useEffect(() => {
+    if (balanceData && decimals) {
+      setFormattedBalance(formatUnits(balanceData as bigint, decimals));
+    }
+  }, [balanceData, decimals]);
+
+  const refreshBalance = async () => {
+    setIsRefetching(true);
+    try {
+      await refetchBalance();
+    } finally {
+      setIsRefetching(false);
+    }
+  };
 
   return {
-    balance: balanceData as bigint || BigInt(0),
+    balance: balanceData as bigint,
     formattedBalance,
-    symbol: symbolData as string || "CLANKER",
-    decimals: decimalsData as number || 18,
+    symbol,
+    decimals,
+    isLoading: isBalanceLoading || isSymbolLoading || isDecimalsLoading,
+    isError: isBalanceError || isSymbolError || isDecimalsError,
+    refreshBalance,
+    isRefetching,
   };
 }
 
@@ -194,4 +239,34 @@ async function waitForTransaction(hash: `0x${string}`) {
       }
     }, 1000);
   });
+}
+
+export function useTokenTransfer() {
+  const { writeContractAsync, isPending, isError, error, reset } = useWriteContract();
+
+  const transferTokens = async (toAddress: string, amount: string, decimals: number) => {
+    if (!toAddress || !amount) return;
+
+    try {
+      const parsedAmount = parseUnits(amount, decimals);
+      
+      return await writeContractAsync({
+        address: CLANKER_TOKEN_ADDRESS as `0x${string}`,
+        abi: TOKEN_ABI,
+        functionName: "transfer",
+        args: [toAddress, parsedAmount],
+      });
+    } catch (error) {
+      console.error("Error transferring tokens:", error);
+      throw error;
+    }
+  };
+
+  return {
+    transferTokens,
+    isPending,
+    isError,
+    error,
+    reset
+  };
 } 

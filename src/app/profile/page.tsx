@@ -112,9 +112,9 @@ export default function ProfilePage() {
                 {profileData.topWinners.map((winner) => (
                   <div key={winner._id} className="bg-gray-800/50 rounded-lg overflow-hidden">
                     <div className="aspect-square overflow-hidden">
-                      <img 
-                        src={winner.url} 
-                        alt={winner.modelName || 'Model'} 
+                      <img
+                        src={winner.url}
+                        alt={winner.modelName || 'Model'}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -126,7 +126,7 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="text-gray-400 text-center p-6 bg-gray-800/30 rounded-lg">
-                You haven't voted for anyone yet!
+                You haven&apos;t voted for anyone yet!
               </div>
             )}
           </div>

@@ -2,6 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Add cool animations */
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+@keyframes fadeout {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-pop {
+  animation: pop 1s ease-out forwards;
+}
+
+.animate-fadeout {
+  animation: fadeout 1s ease-out forwards;
+}
+
+.animate-shine {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shine 1.5s linear infinite;
+}
+
+.text-shadow {
+  text-shadow: 0 0 10px rgba(219, 39, 119, 0.8),
+               0 0 20px rgba(219, 39, 119, 0.6),
+               0 0 30px rgba(219, 39, 119, 0.4),
+               0 0 40px rgba(219, 39, 119, 0.2);
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
